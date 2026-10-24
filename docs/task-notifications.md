@@ -190,11 +190,26 @@ None of these paths is available through the separate preview origin.
   captures show pending, confirmation, connected and unconfigured states without
   horizontal overflow. The mechanical design detector returned no findings.
 
-A separate live preflight validated the operator-provided bot token with
-Telegram's `getMe` and checked for a conflicting webhook. The supplied AWS
-identity returned `AccessDeniedException` for storing `/substrate/telegram/*`,
-so the control service has not been redeployed and no real Telegram message was
-sent. Grant that identity `ssm:GetParameter` and `ssm:PutParameter` on
-`arn:aws:ssm:ap-south-1:*:parameter/substrate/telegram/*`, or run the setup with
-an already authorized operator identity. Then deploy control, register the webhook
-and complete one signed-in user's test before claiming production delivery.
+Live activation used the provided ignored `.env` token. Telegram validated the
+bot; the supplied AWS identity could not write the new Parameter Store prefix
+or inspect/manage IAM. The encrypted control-file installer therefore supplied
+the fallback configuration without an IAM change. Root ownership/mode 0600 and
+removal of the one-use transfer keys were verified on control.
+
+Control/UI release `af0f7a9` is deployed. Migration 3, RDS IAM/TLS, the existing
+CLI credential/history, SSH/Windows stores and KMS checks passed on AWS, with
+all synthetic acceptance rows cleaned up. The secret-authenticated callback was
+probed through the public URL and Telegram accepted webhook registration.
+Anonymous settings/connect requests return 401; unauthenticated callbacks return
+404. Telegram reported no pending incoming updates or provider error.
+
+The operator completed the browser/Telegram flow and reported receiving the
+test. Read-only RDS checks confirmed two successful sends and no pending
+deliveries after a control redeploy. The chat connection was subsequently
+disconnected; that preference was retained rather than overridden. No paid agent
+or extra VM was started, and hostd/performance code was not deployed.
+
+Another deployment briefly restored older main during validation. The notification
+release was restored and the public routes rechecked. Future control deployments
+must include this feature to retain its routes; the root-only fallback file is
+retained even if an older application release temporarily ignores it.
